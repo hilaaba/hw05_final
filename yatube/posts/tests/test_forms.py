@@ -12,7 +12,7 @@ from django.urls import reverse
 from ..forms import PostForm
 from ..models import Group, Post
 
-TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.MEDIA_ROOT)
+TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
 User = get_user_model()
 

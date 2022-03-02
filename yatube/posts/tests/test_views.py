@@ -12,7 +12,7 @@ from django.urls import reverse
 from ..models import Follow, Group, Post
 from ..views import POSTS_COUNT_PER_PAGE
 
-TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.MEDIA_ROOT)
+TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
 User = get_user_model()
 
