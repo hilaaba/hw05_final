@@ -5,6 +5,7 @@ from http import HTTPStatus
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db.models.fields.files import ImageFieldFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
@@ -95,7 +96,7 @@ class PostFormTests(TestCase):
         self.assertEqual(last_post.author, form_data['author'])
         self.assertEqual(last_post.text, form_data['text'])
         self.assertEqual(last_post.group.pk, form_data['group'])
-        self.assertEqual(last_post.image, form_data['image'])
+        self.assertIsInstance(last_post.image, ImageFieldFile)
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_edit_post(self):
@@ -138,7 +139,7 @@ class PostFormTests(TestCase):
         self.assertEqual(modified_post.author, form_data['author'])
         self.assertEqual(modified_post.text, form_data['text'])
         self.assertEqual(modified_post.group.pk, form_data['group'])
-        self.assertEqual(modified_post.image, form_data['image'])
+        self.assertIsInstance(modified_post.image, ImageFieldFile)
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_add_comment(self):
