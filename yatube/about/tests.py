@@ -7,8 +7,6 @@ from django.urls import reverse
 User = get_user_model()
 
 
-# Тесты для /about и /users являются дополнительными заданиями,
-# поэтому я не сделал их в начале, но потом доделаю обязательно
 class AboutURLTests(TestCase):
     def setUp(self):
         self.guest_client = Client()

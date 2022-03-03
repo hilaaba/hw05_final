@@ -1,7 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.shortcuts import (get_list_or_404, get_object_or_404, redirect,
-                              render)
+from django.shortcuts import (
+    get_list_or_404, get_object_or_404, redirect, render
+)
 
 from .forms import CommentForm, PostForm
 from .models import Follow, Group, Post, User
@@ -38,9 +39,10 @@ def profile(request, username):
     author = get_object_or_404(User, username=username)
     posts = author.posts.all()
     posts_count = posts.count()
-    following = False
-    if request.user.is_authenticated:
-        following = Follow.objects.filter(user=request.user, author=author)
+    following = (
+        request.user.is_authenticated and
+        Follow.objects.filter(user=request.user, author=author)
+    )
     context = {
         'page_obj': get_page_obj(request, posts),
         'author': author,
@@ -53,7 +55,7 @@ def profile(request, username):
 def post_detail(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     posts_count = post.author.posts.count()
-    form = CommentForm(request.POST or None)
+    form = CommentForm()
     comments = post.comments.all()
     context = {
         'post': post,
@@ -103,7 +105,7 @@ def post_edit(request, post_id):
 
 @login_required
 def add_comment(request, post_id):
-    post = Post.objects.get(pk=post_id)
+    post = get_object_or_404(Post, pk=post_id)
     form = CommentForm(request.POST or None)
     if form.is_valid():
         comment = form.save(commit=False)

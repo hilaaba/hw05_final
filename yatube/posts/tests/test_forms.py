@@ -77,7 +77,6 @@ class PostFormTests(TestCase):
             content_type='image/gif',
         )
         form_data = {
-            'author': self.user,
             'text': 'Тестовый текст',
             'group': self.group.pk,
             'image': new_uploaded,
@@ -87,17 +86,17 @@ class PostFormTests(TestCase):
             data=form_data,
             follow=True,
         )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertRedirects(
             response,
             reverse('posts:profile', kwargs={'username': self.user.username}),
         )
         self.assertEqual(Post.objects.count(), posts_count + 1)
         last_post = Post.objects.first()
-        self.assertEqual(last_post.author, form_data['author'])
+        self.assertEqual(last_post.author, self.user)
         self.assertEqual(last_post.text, form_data['text'])
         self.assertEqual(last_post.group.pk, form_data['group'])
         self.assertIsInstance(last_post.image, ImageFieldFile)
-        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_edit_post(self):
         """
@@ -115,7 +114,6 @@ class PostFormTests(TestCase):
             content_type='image/gif',
         )
         form_data = {
-            'author': self.author,
             'text': 'Измененный тестовый текст',
             'group': self.new_group.pk,
             'image': modified_uploaded,
@@ -128,6 +126,7 @@ class PostFormTests(TestCase):
             data=form_data,
             follow=True,
         )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertRedirects(
             response,
             reverse(
@@ -136,11 +135,10 @@ class PostFormTests(TestCase):
         )
         self.assertEqual(Post.objects.count(), posts_count)
         modified_post = Post.objects.get(pk=self.post.id)
-        self.assertEqual(modified_post.author, form_data['author'])
+        self.assertEqual(modified_post.author, self.author)
         self.assertEqual(modified_post.text, form_data['text'])
         self.assertEqual(modified_post.group.pk, form_data['group'])
         self.assertIsInstance(modified_post.image, ImageFieldFile)
-        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_add_comment(self):
         """
@@ -149,7 +147,6 @@ class PostFormTests(TestCase):
         post = Post.objects.get(pk=self.post.id)
         comments_count = post.comments.count()
         form_data = {
-            'author': self.user,
             'text': 'Новый тестовый комментарий',
         }
         response = self.user_client.post(
@@ -157,15 +154,15 @@ class PostFormTests(TestCase):
             data=form_data,
             follow=True,
         )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertRedirects(
             response,
             reverse('posts:post_detail', kwargs={'post_id': self.post.id}),
         )
         self.assertEqual(post.comments.count(), comments_count + 1)
         last_comment = post.comments.last()
-        self.assertEqual(last_comment.author, form_data['author'])
+        self.assertEqual(last_comment.author, self.user)
         self.assertEqual(last_comment.text, form_data['text'])
-        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_anonymous_cannot_add_comment(self):
         """

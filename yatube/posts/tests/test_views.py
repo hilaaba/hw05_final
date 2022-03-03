@@ -51,6 +51,11 @@ class PostPageTests(TestCase):
             author=cls.author,
             text='Тестовый комментарий',
         )
+        cls.new_group = Group.objects.create(
+            title='Новая тестовая группа',
+            slug='test_new_slug',
+            description='Тестовое описание новой группы',
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -220,11 +225,6 @@ class PostPageTests(TestCase):
             3. profile author
             4. follow_index для user
         """
-        self.new_group = Group.objects.create(
-            title='Новая тестовая группа',
-            slug='test_new_slug',
-            description='Тестовое описание новой группы',
-        )
         self.new_post = Post.objects.create(
             author=self.author,
             group=self.new_group,
@@ -243,6 +243,19 @@ class PostPageTests(TestCase):
             with self.subTest(reverse_name=reverse_name):
                 response = self.user_client.get(reverse_name)
                 self.assertIn(self.new_post, response.context['page_obj'])
+
+    def test_new_post_not_exist_on_another_page(self):
+        """
+        Проверка на то, что новый пост не добавляется на странице:
+            1. другой группы group_posts
+            2. другого пользователя profile user
+            3. follow_index для пользователя not_follower
+        """
+        self.new_post = Post.objects.create(
+            author=self.author,
+            group=self.new_group,
+            text='Новый тестовый пост',
+        )
         reverse_names = (
             reverse('posts:group_posts', kwargs={'slug': self.group.slug}),
             reverse(

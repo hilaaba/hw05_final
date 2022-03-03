@@ -159,10 +159,3 @@ class PostURLTests(TestCase):
             reverse('posts:post_edit', kwargs={'post_id': self.post.id})
         )
         self.assertEqual(response.status_code, HTTPStatus.OK)
-
-    def test_unexisting_page(self):
-        """
-        Несуществующая страница возвращает ошибку 404.
-        """
-        response = self.guest_client.get('/unexisting_page/')
-        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)

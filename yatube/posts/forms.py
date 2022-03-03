@@ -1,18 +1,13 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from .models import Comment, Post
+from .models import Comment, Post, Group
 
 
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
         fields = ('text', 'group', 'image')
-        queryset = Post.objects.all()
-        group = forms.ModelChoiceField(
-            queryset=queryset,
-            required=False,
-        )
         labels = {
             'text': _('Текст поста'),
             'group': _('Группа'),
