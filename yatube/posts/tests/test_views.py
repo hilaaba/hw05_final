@@ -219,7 +219,7 @@ class PostPageTests(TestCase):
 
     def test_new_post_exist_on_page(self):
         """
-        Проверка на добавление нового поста от автора на страницы:
+        Проверка на добавление нового поста от автора в шаблонах:
             1. index
             2. group_posts
             3. profile author
@@ -246,7 +246,7 @@ class PostPageTests(TestCase):
 
     def test_new_post_not_exist_on_another_page(self):
         """
-        Проверка на то, что новый пост не добавляется на странице:
+        Проверка на то, что новый пост не добавляется в шаблонах:
             1. другой группы group_posts
             2. другого пользователя profile user
             3. follow_index для пользователя not_follower
@@ -275,10 +275,18 @@ class PostPageTests(TestCase):
         cache.clear()
         response = self.user_client.get(reverse('posts:index'))
         cache_check = response.content
-        post = Post.objects.get(pk=self.post.id)
-        post.delete()
+        Post.objects.get(pk=self.post.id).delete()
         response = self.user_client.get(reverse('posts:index'))
         self.assertEqual(response.content, cache_check)
+
+    def test_no_cache_index_page(self):
+        """
+        Проверка шаблона index без кеширования.
+        """
+        cache.clear()
+        response = self.user_client.get(reverse('posts:index'))
+        cache_check = response.content
+        Post.objects.get(pk=self.post.id).delete()
         cache.clear()
         response = self.user_client.get(reverse('posts:index'))
         self.assertNotEqual(response.content, cache_check)
@@ -288,41 +296,28 @@ class PostPageTests(TestCase):
         Авторизованный пользователь может подписываться
         на других пользователей.
         """
-        author_follower_count = (
-            Follow.objects.filter(author=self.author).count()
-        )
-        self.new_user = User.objects.create_user(username='NewUser')
-        self.new_user_client = Client()
-        self.new_user_client.force_login(self.not_follower)
-        Follow.objects.create(user=self.new_user, author=self.author)
-        self.assertEqual(
-            Follow.objects.filter(author=self.author).count(),
-            author_follower_count + 1,
-        )
-        response = self.new_user_client.get(
+        response = self.not_follower_client.get(
             reverse(
                 'posts:profile_follow',
                 kwargs={'username': self.author.username},
-            ),
+            )
         )
         excepted_value = reverse(
             'posts:profile',
             kwargs={'username': self.author.username},
         )
         self.assertRedirects(response, excepted_value)
+        self.assertTrue(
+            Follow.objects.filter(
+                user=self.not_follower,
+                author=self.author,
+            ).exists()
+        )
 
     def test_profile_unfollow(self):
         """
         Авторизованный пользователь может отписываться от других пользователей.
         """
-        author_follower_count = (
-            Follow.objects.filter(author=self.author).count()
-        )
-        Follow.objects.filter(user=self.user, author=self.author).delete()
-        self.assertEqual(
-            Follow.objects.filter(author=self.author).count(),
-            author_follower_count - 1,
-        )
         response = self.user_client.get(
             reverse(
                 'posts:profile_unfollow',
@@ -334,6 +329,9 @@ class PostPageTests(TestCase):
             kwargs={'username': self.author.username},
         )
         self.assertRedirects(response, excepted_value)
+        self.assertFalse(
+            Follow.objects.filter(user=self.user, author=self.author).exists()
+        )
 
 
 class PaginatorViewsTest(TestCase):

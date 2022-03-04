@@ -40,8 +40,8 @@ def profile(request, username):
     posts = author.posts.all()
     posts_count = posts.count()
     following = (
-        request.user.is_authenticated and
-        Follow.objects.filter(user=request.user, author=author)
+        request.user.is_authenticated
+        and Follow.objects.filter(user=request.user, author=author)
     )
     context = {
         'page_obj': get_page_obj(request, posts),
