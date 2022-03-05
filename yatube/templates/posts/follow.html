@@ -1,11 +1,10 @@
 {% extends 'base.html' %}
-{% load thumbnail %}
 
 {% block title %}Мои подписки{% endblock %}
 
 {% block content %}
     <h1>Мои подписки</h1>
-    {% include 'posts/includes/switcher.html' %}
+    {% include 'posts/includes/switcher.html' with follow=True %}
     {% for post in page_obj %}
       {% include 'posts/includes/post_list.html' %}
     {% endfor %}

@@ -73,6 +73,7 @@ class PostPageTests(TestCase):
         self.not_follower = User.objects.create_user(username='NotFollower')
         self.not_follower_client = Client()
         self.not_follower_client.force_login(self.not_follower)
+        cache.clear()
 
     def test_pages_uses_correct_template(self):
         """
@@ -272,7 +273,6 @@ class PostPageTests(TestCase):
         """
         Проверка кеширования шаблона index.
         """
-        cache.clear()
         response = self.user_client.get(reverse('posts:index'))
         cache_check = response.content
         Post.objects.get(pk=self.post.id).delete()
@@ -283,7 +283,6 @@ class PostPageTests(TestCase):
         """
         Проверка шаблона index без кеширования.
         """
-        cache.clear()
         response = self.user_client.get(reverse('posts:index'))
         cache_check = response.content
         Post.objects.get(pk=self.post.id).delete()
