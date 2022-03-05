@@ -43,11 +43,13 @@ def profile(request, username):
         request.user.is_authenticated
         and Follow.objects.filter(user=request.user, author=author)
     )
+    follower_count = Follow.objects.filter(author=author).count()
     context = {
         'page_obj': get_page_obj(request, posts),
         'author': author,
         'posts_count': posts_count,
         'following': following,
+        'follower_count': follower_count,
     }
     return render(request, 'posts/profile.html', context)
 
