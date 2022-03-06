@@ -59,11 +59,13 @@ def post_detail(request, post_id):
     posts_count = post.author.posts.count()
     form = CommentForm()
     comments = post.comments.all()
+    follower_count = Follow.objects.filter(author=post.author).count()
     context = {
         'post': post,
         'posts_count': posts_count,
         'form': form,
         'comments': comments,
+        'follower_count': follower_count,
     }
     return render(request, 'posts/post_detail.html', context)
 
@@ -103,6 +105,14 @@ def post_edit(request, post_id):
         'is_edit': True,
     }
     return render(request, 'posts/create_post.html', context)
+
+
+@login_required
+def post_delete(request, post_id):
+    post = get_object_or_404(Post, pk=post_id)
+    if request.user == post.author:
+        post.delete()
+    return render(request, 'posts/post_delete_done.html')
 
 
 @login_required
